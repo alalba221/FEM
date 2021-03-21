@@ -6,7 +6,7 @@
 
 int main()
 {
-	PoissonSolver1D solver(1.0/4,BasisType::_1D_linear, BasisType::_1D_linear);
+	PoissonSolver1D solver(1.0/4,BasisType::_1D_quadratic, BasisType::_1D_quadratic);
 	solver.solve();	
 
 }

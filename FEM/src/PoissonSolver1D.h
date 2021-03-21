@@ -30,7 +30,8 @@ private:
 	GaussInteger* gs;
 
 	Eigen::MatrixXd P, T, Pb_test, Tb_test, Pb_trial, Tb_trial;
-	
+	int number_of_local_basis_test, number_of_local_basis_trial;
+
 	//Eigen::MatrixXd A;
 	Eigen::SparseMatrix<double> A;
 	Eigen::VectorXd b;
@@ -42,13 +43,13 @@ private:
 	/// N_partition : The N for the partition, not the FE basis functions.
 	/// [/comment]
 	int N_fe, N_partition;
-	double h_partition;
+	double h_partition, h_fe;
 	
 	///Mesh information for partition
 	void generate_P_T_1D(double left, double right, double h_partition, BasisType basis_type);
 
 	// Mesh information for finite element basis functions.
-	void generate_Pb_Tb_1D(double left, double right, double h_partition, BasisType basis_type);
+	void generate_Pb_Tb_1D(double left, double right, double h_partition, BasisType trial_basis_type, BasisType test_basis_type);
 
 	/// <summary>
 	/// 三个函数要参数化
@@ -90,11 +91,11 @@ private:
 public:	
 	void solve() {
 		generate_P_T_1D(0, 1, this->h_partition, BasisType::_1D_linear);
-		generate_Pb_Tb_1D(0, 1, this->h_partition, BasisType::_1D_linear);
-		assemble_matrix_from_1D_integral(N_fe, 1, 1, 2, 2);
-	
-
-		assemble_vector_from_1D_integral(N_fe, 0, 2);
+		generate_Pb_Tb_1D(0, 1, this->h_partition, this->trial_basis_type,this->test_basis_type);
+		assemble_matrix_from_1D_integral(N_partition, 1, 1, this->number_of_local_basis_trial, this->number_of_local_basis_test);
+		// std::cout << A << std::endl;
+		assemble_vector_from_1D_integral(N_partition, 0, this->number_of_local_basis_test);
+		//std::cout << b << std::endl;
 		generate_boundary_nodes_1D();
 		treat_Dirichlet_boundary_1D();
 		Eigen::VectorXd x;
