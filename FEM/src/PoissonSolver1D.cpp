@@ -87,23 +87,23 @@ void PoissonSolver1D::generate_Pb_Tb_1D(double left, double right, double h_part
 	}
 }
 
-double PoissonSolver1D::local_basis_1D(double x, const std::vector<double>& vertices, BasisType basis_type, int basis_index, int derivative_degree)
+double PoissonSolver1D::local_basis_1D(double x, const std::vector<double>& vertices, BasisType basis_type, int local_basis_index, int derivative_degree)
 {
 	double result =0;
 	if (basis_type == BasisType::_1D_linear) {
 		if (derivative_degree == 0) {
-			if (basis_index == 0) {
+			if (local_basis_index == 0) {
 				result = (vertices[1] - x) / (vertices[1] - vertices[0]);
 			}
-			else if (basis_index == 1) {
+			else if (local_basis_index == 1) {
 				result = (x - vertices[0]) / (vertices[1] - vertices[0]);
 			}
 		}
 		else if (derivative_degree == 1) {
-			if (basis_index == 0) {
+			if (local_basis_index == 0) {
 				result = 1.0 / (vertices[0] - vertices[1]);
 			}
-			else if (basis_index == 1) {
+			else if (local_basis_index == 1) {
 				result = 1.0 / (vertices[1] - vertices[0]);
 			}
 		}
@@ -116,35 +116,35 @@ double PoissonSolver1D::local_basis_1D(double x, const std::vector<double>& vert
 		double x_bar = (x - vertices[0]) / (vertices[1] - vertices[0]);
 		double dx_bar = 1.0 / h_partition;
 		if (derivative_degree == 0) {
-			if (basis_index == 0) {
+			if (local_basis_index == 0) {
 				result = 2 * x_bar * x_bar - 3 * x_bar + 1;
 			}
-			else if (basis_index == 1) {
+			else if (local_basis_index == 1) {
 				result = 2 * x_bar * x_bar - x_bar;
 			}
-			else if (basis_index == 2) {
+			else if (local_basis_index == 2) {
 				result = -4 * x_bar * x_bar + 4 * x_bar;
 			}
 		}
 		else if (derivative_degree == 1) {
-			if (basis_index == 0) {
+			if (local_basis_index == 0) {
 				result = 4*x_bar*dx_bar-3*dx_bar;
 			}
-			else if (basis_index == 1) {
+			else if (local_basis_index == 1) {
 				result = 4 * x_bar * dx_bar - dx_bar;
 			}
-			else if (basis_index == 2) {
+			else if (local_basis_index == 2) {
 				result = -8 * x_bar * dx_bar + 4 * dx_bar;
 			}
 		}
 		else if (derivative_degree == 2) {
-			if (basis_index == 0) {
+			if (local_basis_index == 0) {
 				result = 4 * dx_bar * dx_bar;
 			}
-			else if (basis_index == 1) {
+			else if (local_basis_index == 1) {
 				result = 4 * dx_bar * dx_bar;
 			}
-			else if (basis_index == 2) {
+			else if (local_basis_index == 2) {
 				result = -8 * dx_bar * dx_bar;
 			}	
 		}

@@ -6,7 +6,9 @@
 #include<Eigen/SparseCholesky>
 #include<Eigen/SparseLU>
 enum class  BoundaryConditionType{
-	Dirichlet
+	Dirichlet,
+	Neumann,
+	Robins
 };
 enum class BasisType {
 	_1D_linear,
@@ -69,6 +71,15 @@ private:
 		else if (x == 1)
 			return cos(1);
 	}
+	inline double exact_solution(double x) {
+		return x * cos(x);
+	}
+	double exact_solution_derivative(double x) {
+		return cos(x) - x*sin(x);
+	}
+		
+
+		
 	// x: the coordinate of the point where we want to evaluate the local FE basis function.
 	// basis_type : the type of the FE.
 	// basis_type = 101 : 1D linear FE.
@@ -85,9 +96,46 @@ private:
 		int number_of_test_local_basis);
 
 
+	
+
 	void generate_boundary_nodes_1D();
 
 	void treat_Dirichlet_boundary_1D();
+	// 在以veretices为界的mesh上的局部FE function
+	double local_FE_function_1D(double x, int mesh, const Eigen::VectorXd & uh, BasisType basis_type, int derivative_degree){
+		double result = 0;
+		std::vector<double>vertices(2);
+		vertices[0] = P(0, T(0, mesh));
+		vertices[1] = P(0, T(1, mesh));
+		double lowerbound = std::min(vertices[0], vertices[1]);
+		double upperbound = std::max(vertices[0], vertices[1]);
+		vertices[0] = lowerbound;
+		vertices[1] = upperbound;
+		for (int k = 0; k < this->number_of_local_basis_test; k++) {
+			result += uh(Tb_test(k, mesh)) * local_basis_1D(x,vertices,basis_type,k,derivative_degree);
+		}
+		return result;
+	}
+	double FE_solution_error_1D(const Eigen::VectorXd& uh, const std::function<double(double)>& exact_solution, int derivative_degree, BasisType test_basis_type) {
+		double result = 0;
+		for (int n = 0; n < N_partition; n++) {
+			std::vector<double>vertices(2);
+			vertices[0] = P(0, T(0, n));
+			vertices[1] = P(0, T(1, n));
+			double lowerbound = std::min(vertices[0], vertices[1]);
+			double upperbound = std::max(vertices[0], vertices[1]);
+			vertices[0] = lowerbound;
+			vertices[1] = upperbound;
+
+			gs->set_bound(lowerbound, upperbound);
+			auto integral_Func = [this,&exact_solution,&n,&uh,&test_basis_type,&derivative_degree]
+			(double x)->double {return (exact_solution(x)-local_FE_function_1D(x,n,uh,test_basis_type,derivative_degree))* 
+				(exact_solution(x) - local_FE_function_1D(x, n, uh, test_basis_type, derivative_degree)); };
+			result += gs->integral(integral_Func);
+		}
+		return result;
+	}
+	
 public:	
 	void solve() {
 		generate_P_T_1D(0, 1, this->h_partition, BasisType::_1D_linear);
@@ -115,7 +163,12 @@ public:
 			std::cout << "solving failed";
 			return;
 		}
-		std::cout << x << std::endl;
+		//std::function<double(double)> a = std::bind(&exact_solution, this, std::placeholders::_1);
+		double L2error = FE_solution_error_1D(x, std::bind(&PoissonSolver1D:: exact_solution, this, std::placeholders::_1), 0, test_basis_type);
+		std::cout << sqrt(L2error) << std::endl;
+
+		double H1error = FE_solution_error_1D(x, std::bind(&PoissonSolver1D::exact_solution_derivative, this, std::placeholders::_1), 1, test_basis_type);
+		std::cout << sqrt(H1error) << std::endl;
 	}
 };
 
