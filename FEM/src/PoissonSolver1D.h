@@ -1,27 +1,11 @@
 ﻿#pragma once
+#include"global.h"
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include <iostream>
 #include "GaussInteger.h"
 #include<Eigen/SparseCholesky>
 #include<Eigen/SparseLU>
-enum class  BoundaryConditionType{
-	Dirichlet,
-	Neumann,
-	Robins
-};
-enum class BasisType {
-	_1D_linear,
-	_1D_quadratic
-};
-
-struct BoundaryNode {
-	BoundaryConditionType bc_type;
-	int global_index = -1;
-	BoundaryNode(BoundaryConditionType type, int index):
-		bc_type(type), global_index(index){
-	}
-};
 
 class PoissonSolver1D
 {
@@ -88,15 +72,12 @@ private:
 	double local_basis_1D(double x, const std::vector<double>& vertices, BasisType basis_type, int basis_index, int derivative_degree);
 	
 	
-	void assemble_matrix_from_1D_integral(int number_of_element, int test_derivative_degree, int trial_derivative_degree,
+	void assemble_matrix_from_1D_integral(int number_of_partition, int test_derivative_degree, int trial_derivative_degree,
 		int number_of_trial_local_basis,
 		int number_of_test_local_basis);
 
-	void assemble_vector_from_1D_integral(int number_of_elements, int test_derivative_degree,
+	void assemble_vector_from_1D_integral(int number_of_partition, int test_derivative_degree,
 		int number_of_test_local_basis);
-
-
-	
 
 	void generate_boundary_nodes_1D();
 
@@ -112,7 +93,7 @@ private:
 		vertices[0] = lowerbound;
 		vertices[1] = upperbound;
 		for (int k = 0; k < this->number_of_local_basis_test; k++) {
-			result += uh(Tb_test(k, mesh)) * local_basis_1D(x,vertices,basis_type,k,derivative_degree);
+			result += uh(Tb_trial(k, mesh)) * local_basis_1D(x,vertices,basis_type,k,derivative_degree);
 		}
 		return result;
 	}

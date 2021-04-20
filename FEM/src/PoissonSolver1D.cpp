@@ -1,4 +1,4 @@
-#include "PoissonSolver1D.h"
+﻿#include "PoissonSolver1D.h"
 
 PoissonSolver1D::PoissonSolver1D(double h_partition, BasisType trial_basis_type, BasisType  test_basis_type)
 	:h_partition(h_partition),trial_basis_type(trial_basis_type),test_basis_type(test_basis_type) {
@@ -86,7 +86,7 @@ void PoissonSolver1D::generate_Pb_Tb_1D(double left, double right, double h_part
 		}
 	}
 }
-
+// vertices stoire the bound on the mesh not FE!
 double PoissonSolver1D::local_basis_1D(double x, const std::vector<double>& vertices, BasisType basis_type, int local_basis_index, int derivative_degree)
 {
 	double result =0;
@@ -157,13 +157,13 @@ double PoissonSolver1D::local_basis_1D(double x, const std::vector<double>& vert
 
 
 
-void PoissonSolver1D::assemble_matrix_from_1D_integral(int number_of_element, int test_derivative_degree, int trial_derivative_degree,
+void PoissonSolver1D::assemble_matrix_from_1D_integral(int number_of_partition, int test_derivative_degree, int trial_derivative_degree,
 	int number_of_trial_local_basis,
 	int number_of_test_local_basis)
 {
 	// A should be the size of # of test rows x # of trial cols
 	A = Eigen::SparseMatrix<double>(N_fe + 1, N_fe + 1);
-	for (int n = 0; n < number_of_element; n++) {
+	for (int n = 0; n < number_of_partition; n++) {
 		std::vector<double>vertices(2);
 		vertices[0] = P(0, T(0, n));
 		vertices[1] = P(0, T(1, n));
@@ -182,18 +182,24 @@ void PoissonSolver1D::assemble_matrix_from_1D_integral(int number_of_element, in
 				auto finalFunc = [this, &trial_basis, &test_basis](double x)->double {return coefficient_function(x) * trial_basis(x) * test_basis(x); };
 				double temp = gs->integral(finalFunc);
 				
+				/*if (Tb_test(beta, n) == Tb_trial(alpha, n)) {
+					A.coeffRef(Tb_test(beta, n), Tb_trial(alpha, n)) += temp;
+				}
+				else
+					A.coeffRef(Tb_test(beta, n), Tb_trial(alpha, n)) = temp;*/
+				// mesh 边界需要+=， 其他元素直接=, 因为mesh边界点对应的基函数位于两个相邻的mesh上
 				A.coeffRef(Tb_test(beta, n), Tb_trial(alpha, n)) += temp;
 			}
 		}
 	}
 }
 
-void PoissonSolver1D::assemble_vector_from_1D_integral(int number_of_elements, int test_derivative_degree
+void PoissonSolver1D::assemble_vector_from_1D_integral(int number_of_partition, int test_derivative_degree
 	, int number_of_test_local_basis)
 {
 	b = Eigen::VectorXd::Zero(N_fe+1);
 
-	for (int n = 0; n < number_of_elements; n++) {
+	for (int n = 0; n < number_of_partition; n++) {
 		std::vector<double>vertices(2);
 		vertices[0] = P(0, T(0, n));
 		vertices[1] = P(0, T(1, n));

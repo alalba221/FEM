@@ -40,7 +40,7 @@ void GaussInteger::set_bound(double lower, double upper)
 
 double GaussInteger::integral(std::function<double(double)> Func)
 {
-    generate_Gauss_local_1D(this->lowerbound,this->upperbound);
+//generate_Gauss_local_1D(this->lowerbound,this->upperbound);
     
     double result = 0;
     for (int i = 0; i < Gauss_coefficient_local_1D->size(); i++) {

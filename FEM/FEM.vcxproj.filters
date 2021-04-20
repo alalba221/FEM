@@ -24,12 +24,27 @@
     <ClCompile Include="src\GaussInteger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\PoissonSolver2D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GaussianIntegerTriangle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\PoissonSolver1D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\GaussInteger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PoissonSolver2D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\global.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GaussianIntegerTriangle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

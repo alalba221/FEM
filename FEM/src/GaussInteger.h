@@ -1,7 +1,9 @@
 ﻿#pragma once
 #include <vector>
+#include <array>
 #include <cmath>
 #include<functional>
+#include <memory>
 class GaussInteger
 {
 public:
@@ -26,6 +28,7 @@ private:
     std::vector<double>* Gauss_point_reference_1D;
     std::vector<double>* Gauss_coefficient_local_1D;
     std::vector<double>* Gauss_point_local_1D;
+    
 
     //Generate the Gauss coefficients and Gauss points on an arbitrary interval [lower_bound,upper_bound] by using affine tranformation.
     void generate_Gauss_local_1D(double lowerbound, double upperbound);
